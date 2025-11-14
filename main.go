@@ -98,7 +98,7 @@ func HandleLoop(conn net.Conn) {
 
 	switch req.Operation {
 	case SAVE:
-		b, err := h.Upload()
+		b, err := h.Upload(req.FileData)
 
 		if err != nil {
 			h.ErrorResponseWriter(conn, "failed to upload file")

@@ -1,18 +1,25 @@
 package handlers
 
 import (
+	"go-file-streamer/storage"
 	. "go-file-streamer/utils"
 	"net"
 )
 
-func (h *Handler) Upload() ([]byte, error) {
+func (h *Handler) Upload(fileData *[]byte) ([]byte, error) {
 
-	uuid := "9226334b-83d6-4b47-a8e9-4b5efcb59e3c"
+	saver := storage.NewSaverService("./db")
+
+	fileId, err := saver.SaveFile(fileData)
+
+	if err != nil {
+		return []byte{}, err
+	}
 
 	res := UploadResponse{
 		IsError: false,
 		Message: "Received file data",
-		DataId:  &uuid,
+		DataId:  fileId,
 	}
 
 	b, err := res.ParseResponseToBytes()
