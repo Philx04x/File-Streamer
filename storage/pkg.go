@@ -5,20 +5,19 @@ type Saver struct {
 }
 
 type ISaver interface {
-	SaveFile(*[]byte) (*string, error)
+	SaveFile(*[]byte) (string, error)
 	RetrieveFile(string) (*[]byte, error)
 	BuildUpCache() error
 }
 
-func NewSaverService(path string) Saver {
-	ser := NewFileSaver(path)
+func NewSaverService(ser ISaver) Saver {
 
 	return Saver{
 		Service: ser,
 	}
 }
 
-func (s *Saver) SaveFile(fileData *[]byte) (*string, error) {
+func (s *Saver) SaveFile(fileData *[]byte) (string, error) {
 	return s.Service.SaveFile(fileData)
 }
 

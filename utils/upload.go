@@ -24,7 +24,7 @@ func (r *UploadResponse) ParseResponseToStruct(resBytes []byte) error {
 	res := UploadResponse{
 		IsError: isError,
 		Message: msg,
-		DataId:  &id,
+		DataId:  id,
 	}
 
 	*r = res

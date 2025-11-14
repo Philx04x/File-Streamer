@@ -5,18 +5,17 @@ import (
 	. "go-file-streamer/utils"
 )
 
-func (h *Handler) Upload(fileData *[]byte, saver storage.Saver) ([]byte, error) {
-
-	fileId, err := saver.SaveFile(fileData)
+func (h *Handler) Download(fileId string, saver storage.Saver) ([]byte, error) {
+	fileData, err := saver.RetrieveFile(fileId)
 
 	if err != nil {
 		return []byte{}, err
 	}
 
-	res := UploadResponse{
-		IsError: false,
-		Message: "Received file data",
-		DataId:  fileId,
+	res := RetrieveResponse{
+		IsError:  false,
+		Message:  "Retrieved file data",
+		FileData: fileData,
 	}
 
 	b, err := res.ParseResponseToBytes()

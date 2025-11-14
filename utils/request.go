@@ -14,7 +14,6 @@ func (r *Request) ParseRequestToStruct(reqBytes []byte) error {
 	lines := bytes.Split(reqBytes, []byte("\r\n"))
 
 	opStr := string(lines[0])
-	fileData := lines[1]
 
 	var op Operation = 0
 
@@ -27,9 +26,21 @@ func (r *Request) ParseRequestToStruct(reqBytes []byte) error {
 		return fmt.Errorf("failed pattern matching on operations")
 	}
 
+	var fileData []byte = []byte{}
+	var fileId string = ""
+
+	if op == SAVE {
+		fileData = lines[1]
+	} else if op == RETRIEVE {
+		fileId = string(lines[1])
+	} else {
+		return fmt.Errorf("failed if matching on operations")
+	}
+
 	req := Request{
 		Operation: op,
-		FileData:  &fileData,
+		FileData:  fileData,
+		FileId:    fileId,
 	}
 
 	*r = req
@@ -38,11 +49,17 @@ func (r *Request) ParseRequestToStruct(reqBytes []byte) error {
 }
 
 func (r *Request) ParseRequestToBytes() ([]byte, error) {
-	if len(*(r.FileData)) == 0 {
-		return []byte{}, fmt.Errorf("failed to parse empty file data")
+	if r.FileData == nil && r.FileId == "" {
+		return []byte{}, fmt.Errorf("failed to parse empty fields")
 	}
 
-	s := []byte(fmt.Sprintf("%v\r\n%v\r\n\r\n", r.Operation, r.FileData))
+	var s []byte
+
+	if r.FileId == "" {
+		s = []byte(fmt.Sprintf("%v\r\n%v\r\n\r\n", r.Operation, r.FileData))
+	} else if r.FileData == nil {
+		s = []byte(fmt.Sprintf("%v\r\n%v\r\n\r\n", r.Operation, r.FileId))
+	}
 
 	return s, nil
 }

@@ -10,7 +10,7 @@ const (
 type UploadResponse struct {
 	IsError bool
 	Message string
-	DataId  *string
+	DataId  string
 }
 
 type RetrieveResponse struct {
@@ -21,5 +21,6 @@ type RetrieveResponse struct {
 
 type Request struct {
 	Operation Operation
-	FileData  *[]byte
+	FileData  []byte
+	FileId    string
 }

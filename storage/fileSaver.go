@@ -22,25 +22,23 @@ type FileSaver struct {
 	path       string
 }
 
-func (s *FileSaver) SaveFile(fileData *[]byte) (*string, error) {
+func (s *FileSaver) SaveFile(fileData *[]byte) (string, error) {
 	fileId := uuid.NewString()
 
 	err := os.WriteFile(fmt.Sprintf("%s/%s.bin", s.path, fileId), *fileData, 0644)
 	if err != nil {
-		return nil, ErrFileWrite
+		return "", ErrFileWrite
 	}
 
 	s.fileMu.Lock()
 	s.filesCache[fileId] = fileData
 	s.fileMu.Unlock()
 
-	return &fileId, nil
+	return fileId, nil
 }
 
 func (s *FileSaver) RetrieveFile(fileId string) (*[]byte, error) {
-	s.fileMu.RLock()
 	cacheData := s.filesCache[fileId]
-	s.fileMu.Unlock()
 
 	if cacheData != nil {
 		return cacheData, nil

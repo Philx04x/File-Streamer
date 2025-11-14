@@ -22,7 +22,11 @@ type Config struct {
 var conf Config
 
 func init() {
-	conf.saver = storage.NewSaverService("./db")
+	ser := storage.NewFileSaver("./db")
+
+	saver := storage.NewSaverService(ser)
+	conf.saver = saver
+
 	err := conf.saver.BuildUpCache()
 
 	if err != nil {
@@ -106,13 +110,18 @@ func HandleLoop(conn net.Conn) {
 
 	fmt.Println("Request Data:")
 	fmt.Printf("Operation: %v\n", req.Operation)
-	fmt.Printf("FileData Length: %v\n", len(*(req.FileData)))
+
+	if req.Operation == SAVE {
+		fmt.Printf("FileData Length: %v\n", len(req.FileData))
+	} else if req.Operation == RETRIEVE {
+		fmt.Printf("FileId: %s\n", req.FileId)
+	}
 
 	h := handlers.NewHandler()
 
 	switch req.Operation {
 	case SAVE:
-		b, err := h.Upload(req.FileData, conf.saver)
+		b, err := h.Upload(&req.FileData, conf.saver)
 
 		if err != nil {
 			h.ErrorResponseWriter(conn, "failed to upload file")
@@ -125,7 +134,19 @@ func HandleLoop(conn net.Conn) {
 		return
 
 	case RETRIEVE:
-		h.ErrorResponseWriter(conn, "operation not implemented")
+		if req.FileId == "" {
+			h.ErrorResponseWriter(conn, "failed to find file with missing id")
+			return
+		}
+
+		b, err := h.Download(req.FileId, conf.saver)
+
+		if err != nil {
+			h.ErrorResponseWriter(conn, "failed to download file")
+			return
+		}
+
+		h.ResponseWriter(conn, b)
 		return
 	default:
 		h.ErrorResponseWriter(conn, "failed pattern matching on operation")
