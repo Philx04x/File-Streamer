@@ -6,9 +6,7 @@ import (
 	"net"
 )
 
-func (h *Handler) Upload(fileData *[]byte) ([]byte, error) {
-
-	saver := storage.NewSaverService("./db")
+func (h *Handler) Upload(fileData *[]byte, saver storage.Saver) ([]byte, error) {
 
 	fileId, err := saver.SaveFile(fileData)
 

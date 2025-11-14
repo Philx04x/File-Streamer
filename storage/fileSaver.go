@@ -60,3 +60,40 @@ func (s *FileSaver) RetrieveFile(fileId string) (*[]byte, error) {
 
 	return &fileData, nil
 }
+
+func (s *FileSaver) BuildUpCache() error {
+	dir, err := os.ReadDir(s.path)
+
+	if err != nil {
+		return ErrFileDirReader
+	}
+
+	for _, file := range dir {
+
+		fName := file.Name()
+		fName = fName[:len(fName)-4]
+
+		if s.filesCache[fName] != nil {
+			continue
+		}
+
+		fileReader, err := os.Open(fmt.Sprintf("%s/%s.bin", s.path, fName))
+
+		if err != nil {
+			return ErrFileOpen
+		}
+
+		defer fileReader.Close()
+
+		fileData, err := io.ReadAll(fileReader)
+
+		if err != nil {
+			return ErrFileReader
+		}
+
+		s.filesCache[fName] = &fileData
+
+	}
+
+	return nil
+}

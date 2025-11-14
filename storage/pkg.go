@@ -7,6 +7,7 @@ type Saver struct {
 type ISaver interface {
 	SaveFile(*[]byte) (*string, error)
 	RetrieveFile(string) (*[]byte, error)
+	BuildUpCache() error
 }
 
 func NewSaverService(path string) Saver {
@@ -23,4 +24,8 @@ func (s *Saver) SaveFile(fileData *[]byte) (*string, error) {
 
 func (s *Saver) RetrieveFile(fileId string) (*[]byte, error) {
 	return s.Service.RetrieveFile(fileId)
+}
+
+func (s *Saver) BuildUpCache() error {
+	return s.Service.BuildUpCache()
 }

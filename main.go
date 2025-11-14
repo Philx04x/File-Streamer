@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"go-file-streamer/handlers"
+	"go-file-streamer/storage"
 	. "go-file-streamer/utils"
 	"io"
 	"net"
@@ -14,10 +15,23 @@ const (
 )
 
 type Config struct {
-	lis net.Listener
+	lis   net.Listener
+	saver storage.Saver
+}
+
+var conf Config
+
+func init() {
+	conf.saver = storage.NewSaverService("./db")
+	err := conf.saver.BuildUpCache()
+
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
+
 	server := NewTCPServer()
 
 	chn := make(chan bool)
@@ -98,7 +112,7 @@ func HandleLoop(conn net.Conn) {
 
 	switch req.Operation {
 	case SAVE:
-		b, err := h.Upload(req.FileData)
+		b, err := h.Upload(req.FileData, conf.saver)
 
 		if err != nil {
 			h.ErrorResponseWriter(conn, "failed to upload file")
